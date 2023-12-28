@@ -33,14 +33,37 @@ function App() {
     const  [userId,setUserId]=useState('');
     const  [transactionType,setTransactionType]=useState('');
     const  [sessionId,setSessionId]=useState(''); 
+    const  [requestNumber,setRequestNumber]=useState('');
+    const [portalInbox,setPortalInbox]=useState();
     const {isSession} = useSelector(state => state.dashBoard);
 
+
+    const getDataByReqestNumber = async (reqId) => {
+      var requestOptions = {
+        method: 'GET',
+        redirect: 'follow'
+      };
+      
+      fetch("https://pai-soa-uat.pai.gov.kw:7017/PAI/SmartFormServices/SmartForm_RS/getPortalViewInboxByReqId?reqId="+reqId, requestOptions)
+        .then(response => response.text())
+        .then(result => {
+          console.log(JSON.parse(result).PortalInbox[0]);
+          setPortalInbox(JSON.parse(result).PortalInbox[0]);
+          const numberStr = JSON.parse(result).PortalInbox[0].toString();
+          if(numberStr.startsWith("90")){
+              console.log("contract");
+             }else{
+              console.log("license");
+             }
+          })
+        .catch(error => console.log('error', error));
+    }
 
 	 useEffect(() => {
   
   const params = queryString.parse(window.location.search);
 
-   
+ 
   const transId = atob(params.ti);//params.transId);
   const licenseNo = atob(params.lc);//params.licenseNo);
   const catType =params.ct=='null'?' PLOTS': atob(params.ct).replace('+',' ');//params.catType); Larg industry , small workshop, plot
@@ -50,7 +73,7 @@ function App() {
   const transactionType = atob(params.tt); //example Small Mudium Compelex
   const sessionId = params.si;
   const reqId=atob(params.ri);
-    
+  console.log('requestId:',reqId);
     setTransactionId(transId);
     setLicenseNo(licenseNo);
     setCategoryType(catType);
@@ -59,6 +82,10 @@ function App() {
     setUserId(userId);
     setTransactionType(transactionType);
     setSessionId(sessionId);
+    setRequestNumber(reqId);
+    if(reqId!=undefined||reqId!='null'){
+    getDataByReqestNumber(reqId);
+    }
     const fetchData = async () => {
       try {
         const formData={
@@ -79,6 +106,8 @@ function App() {
     // Call setTimeout to schedule the delayedFunction
    
 
+    
+
     // Now you can use these parameters to make API requests or perform other actions
     console.log('transId:', transId);
     console.log('licenseNo:', licenseNo);
@@ -88,7 +117,7 @@ function App() {
     console.log('userId:', userId);
     console.log('transactionType:', transactionType);
     console.log('sessionId:', sessionId);
-    console.log('requestId: ',reqId);
+    console.log('requestId:',reqId);
     fetchData();
     setTimeout(console.log('delay'), delayTime);
    }, [transactionId,licenseNo,categoryType,type,lang,userId,transactionType,sessionId]);

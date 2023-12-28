@@ -96,7 +96,7 @@ function Payment(props){
 
   const callattachment= async (args)=>{
     if (args.PortalOnlineDoc !== null) {
-       args.selectedFiles.forEach(file1 => {
+       args.selectedFiles.forEach(async file1 => {
          const docType = args.PortalOnlineDoc.find((portal) => portal.docId === file1.docId);
          const formData = new FormData();
 
@@ -116,7 +116,7 @@ function Payment(props){
          formData.append('contractNo', null);
          
          // Make the POST request using Axios
-         axios.post('/DashBoard/Documents_RS/SubmitArchiveDocument', formData, {
+          await axios.post('/DashBoard/Documents_RS/SubmitArchiveDocument', formData, {
            headers: {
             'Content-Type': 'application/json; charset=utf-8', // Important for handling files
            },
